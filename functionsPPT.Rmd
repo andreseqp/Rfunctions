@@ -1,0 +1,19 @@
+---
+title: "Funciones en R"
+author: "Andres Quiñones"
+date: "26/2/2020"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## ¿Que es una función?
+
+### Matemáticas
+Es una forma de relacionar una serie de *inputs* (entradas) y *outputs* (salidas).
+
+### Computación
+Un subconjunto de instrucción que realizan 
+
