@@ -2,18 +2,261 @@
 title: "Funciones en R"
 author: "Andres Quiñones"
 date: "26/2/2020"
-output: beamer_presentation
+output: 
+  beamer_presentation:
+    slide_level: 2
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library("here")
 ```
 
+
 ## ¿Que es una función?
+
 
 ### Matemáticas
 Es una forma de relacionar una serie de *inputs* (entradas) y *outputs* (salidas).
 
 ### Computación
-Un subconjunto de instrucción que realizan 
+Un subconjunto de instrucciones que realizan una parte de los cómputos de un programa
+
+## Uso de las funciones
+
+### ¿Cuando usar funciones en un programa?
+
+Cuando a lo largo del proyecto existe una misma operación que se usa repetidamente sobre diferentes *objetos* y se esperan diferentes resultados dependiendo del *objeto* al que se le aplique.
+
+### ¿Por qué se deberían usar funciones?
+
+* Reduce la longitud del código
+* Disminuye las oportunidades de tener errores
+* Facilita generalizar cambios a lo largo del proyecto
+* Facilita el entendimiento del código para otras personas 
+(particularmente para nuestro yo futuro)
+* Facilita el use de versiones *vectorizadas* de loops, lo cuál (en ciertos situaciones) facilita paralelizar los cómputos
+
+## Funciones en R
+
+¡R está lleno de funciones!
+
+Algunos "*expertos*" argumentan que _R_ es un lenguaje basado en functiones (Funtional programming)
+
+En realidad eso depende de si uno como programador usa funciones, o no.
+
+## Sintaxis 
+
+### Declaración de UDF (user defined functions)
+
+```{r,eval=FALSE,echo=TRUE}
+nombre=function(INPUT){
+  cuerpo
+  return(OUTPUT)
+}
+```
+
+### Ejecución de funciones
+
+```{r,eval=TRUE,echo=FALSE}
+nombre=function(INPUT){
+  "OUTPUT"
+}
+INPUT=0
+
+```
+
+
+```{r,eval=TRUE,echo=TRUE}
+nombre(INPUT)
+
+```
+
+## Ambientes durante la ejecución
+
+```{r}
+knitr::include_graphics(here("globalEnv.png"))
+```
+
+## Ambientes durante la ejecución
+
+```{r}
+knitr::include_graphics(here("localEnv.png"))
+```
+
+# Usemos funciones!!
+
+## Mi primera función
+
+### Polinomio
+\begin{align*}
+y=ax^2+bx+c
+\end{align*}
+
+```{r,eval=TRUE,echo=TRUE}
+poli=function(x){
+  a=2
+  b=3
+  c=1
+  y=a*x^2+b*x+c
+  return(y)
+}
+poli(2)
+```
+
+
+## Polinomio
+
+\begin{align*}
+y=ax^2+bx+c
+\end{align*}
+\small
+```{r,fig.align='centrar',echo=TRUE,out.height='50%'}
+rangX=seq(-5,5,length.out = 1000)
+yVal=poli(rangX)
+plot(rangX,yVal,type="l",ylab="y",xlab="x",cex.lab=2,lwd=2)
+
+```
+
+## Polinomio
+
+```{r,eval=TRUE,echo=TRUE}
+poli2=function(a,b,c,x){
+  y=a*x^2+b*x+c
+  return(y)
+}
+poli2(a=2,b=3,c=1,2)
+```
+
+## Polinomio
+
+```{r,fig.align='centrar',echo=TRUE,out.height='50%'}
+valsA=1:5
+yVals_A=sapply(valsA,FUN = poli2,x=rangX,b=3,c=1)
+matplot(yVals_A,x=rangX,type="l",lty=1,
+        col =1:5,ylab="y",xlab="x",cex.lab=2,lwd=2)
+legend("top",legend =valsA,col = 1:5,title = "a",lwd=2,cex=2)
+```
+
+## Hagamos funciones más útiles
+
+### Centrar los datos 
+\vspace{-1cm}
+\small
+\begin{align*}
+x={1,4,7,4....}\\
+x'=x-\bar{x}+a
+\end{align*}
+\vspace{-0.5cm}
+\pause
+\small
+```{r,echo=TRUE,size=2}
+centrar = function(datos, n.centro) {
+  n.datos = (datos - mean(datos)) + n.centro
+  return(n.datos)
+}
+x_1=c(4,6,35,45,1,59)
+centrar(x_1,0)
+mean(x_1)
+mean(centrar(x_1,0))
+mean(centrar(x_1,5))
+
+```
+
+## Centrar los datos 
+
+Es común centrar los datos alrededor del 0
+
+\pause
+
+```{r,echo=TRUE,size=2}
+centrar = function(datos, n.centro=0) {
+  n.datos = (datos - mean(datos)) + n.centro
+  return(n.datos)
+}
+x_1=c(4,6,35,45,1,59)
+centrar(x_1)
+centrar(x_1,0)
+centrar(x_1,5)
+
+```
+
+## Para todo un juego de datos
+
+```{r,echo=TRUE}
+centrar = function(datos, n.centro=0) {
+  n.datos = (datos - mean(datos)) + n.centro
+  return(n.datos)
+}
+means=c(2,56,45,9,-4)
+r.data=data.frame(lapply(means, rnorm,n=1000,sd=0.5))
+names(r.data)=paste0("R_",1:5)
+```
+
+## Para todo un juego de datos
+
+```{r,echo=TRUE}
+lapply(r.data, mean) # means=c(2,56,45,9,-4)
+
+```
+
+## Para todo un juego de datos
+
+```{r,echo=TRUE}
+c.data=centrar(r.data)
+
+```
+
+
+## Para todo un juego de datos
+
+```{r,echo=TRUE}
+c.data=lapply(r.data, centrar)
+lapply(c.data, mean)
+
+```
+
+## Funciones más complejas
+
+Caractericemos un juego de datos
+
+```{r}
+descStats<-function(x){
+  m.dat=mean(x,na.rm = T)
+  sd.dat=sd(x,na.rm = T)
+  cv.dat=sd.dat/m.dat
+  mx.dat=max(x,na.rm = T)
+  mn.dat=min(x,na.rm = T)
+  list(m.dat,sd.dat,cv.dat,mx.dat,mn.dat)
+}
+```
+
+## Funciones más complejas
+
+
+```{r}
+descStats(r.data$R_1)
+```
+
+## Funciones más complejas
+
+
+```{r}
+sapply(r.data,descStats)
+```
+
+## Gráficas
+
+```{r}
+pdf(here("graphs.pdf"))
+randN<-runif(1000)
+lapply(r.data, function(x){
+plot(randN,x,pch=20,col="red")
+l.mod<-lm(x~randN)
+abline(l.mod)
+})
+dev.off()
+```
+
+
 
